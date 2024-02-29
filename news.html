@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Single News</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Credo News</h1>
+      <a href="/index.html" class="all_news">All News</a>
+
+    </header>
+
+    <section id="singleNews" class="news_container"></section>
+
+    <section class="update_form">
+      <h2>Update News</h2>
+    <form id="updateForm">
+      <div class="form_news">
+        <label for="author">Author</label>
+        <input type="text" id="author" name="author" />
+      </div>
+      <div class="form_news">
+        <label for="avatar">Avatar</label>
+        <input type="text" id="avatar" name="avatar" />
+      </div>
+      <div class="form_news">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" />
+      </div>
+      <div class="form_news">
+        <label for="url">URL</label>
+        <input type="text" id="url" name="url" />
+      </div>
+      <button type="submit" class="news_btn">Update</button>
+
+    </form>
+    </section>
+
+   
+    <script>
+      const apiBaseUrl = "https://61924d4daeab5c0017105f1a.mockapi.io/credo/v1";
+      const singleNews = document.getElementById("singleNews");
+      const updateForm = document.getElementById("updateForm");
+
+      // Get the news ID from the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const newsId = urlParams.get("id");
+
+      // function to get single news
+      function getSingleNews(newsId) {
+        const urlImg = `${apiBaseUrl}/news/${newsId}/images`;
+        const urlComment = `${apiBaseUrl}/news/${newsId}/comments`;
+        const urlNews = `${apiBaseUrl}/news/${newsId}`;
+
+        fetch(urlNews)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network Error");
+            }
+            return response.json();
+          })
+          .then((news) => {
+            displaySingleNews(news);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        fetch(urlImg)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network Error");
+            }
+            return response.json();
+          })
+          .then((image) => {
+            displayImg(image);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+
+        fetch(urlComment)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network Error");
+            }
+            return response.json();
+          })
+          .then((comment) => {
+            displayComment(comment);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      function displaySingleNews(news) {
+        const newsElement = document.createElement("div");
+        newsElement.classList.add("news_item");
+
+        const imgElement = document.createElement("img");
+        imgElement.src = news.avatar;
+
+        const titleElement = document.createElement("h3");
+        titleElement.textContent = news.title;
+
+        const authorElement = document.createElement("p");
+        authorElement.textContent = news.author;
+
+        const urlElement = document.createElement("p");
+        urlElement.textContent = news.url;
+
+        newsElement.appendChild(imgElement);
+        newsElement.appendChild(titleElement);
+        newsElement.appendChild(authorElement);
+        newsElement.appendChild(urlElement);
+
+        singleNews.appendChild(newsElement);
+        document.getElementById("author").value = news.author;
+        document.getElementById("avatar").value = news.avatar;
+        document.getElementById("title").value = news.title;
+        document.getElementById("url").value = news.url;
+      }
+
+      // Handle form submission
+      updateForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const formData = new FormData(updateForm);
+
+        // Convert formData to JSON object
+        const newsData = {};
+        formData.forEach((value, key) => {
+          newsData[key] = value;
+        });
+
+        // PUT request to update news
+        fetch(`${apiBaseUrl}/news/${newsId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newsData),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to update news item");
+            }
+            alert("News item updated successfully");
+            singleNews.innerHTML = "";
+            getSingleNews(newsId);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      });
+
+      // // Function to display images
+      function displayImg(images) {}
+
+      // // Function to display comments
+      function displayComment(comments) {
+        const commentsContainer = document.createElement("p");
+        commentsContainer.classList.add("comments_container");
+
+        comments.forEach((comment) => {
+          const commentElement = document.createElement("p");
+          commentElement.textContent = comment.text;
+          commentsContainer.appendChild(commentElement);
+        });
+
+        singleNews.appendChild(commentsContainer);
+      }
+
+      // Fetch the news item by its ID
+      getSingleNews(newsId);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add News</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h2>Add News</h2>
+    </header>
+    <form class="form" id="newsForm">
+        <div class="form_news">
+            <label>Author</label>
+            <input type="text" name="author" id="author" />
+        </div> 
+        <div class="form_news">
+            <label>Avatar</label>
+            <input type="text" name="avatar" id="avatar" />
+        </div>
+        <div class="form_news">
+            <label>Title</label>
+            <input type="text" name="title" id="title" />
+        </div>
+        <div class="form_news">
+            <label>URL</label>
+            <input type="text" name="url" id="url" />
+        </div>
+        <button type="submit" class="news_btn">Submit</button>
+    </form>
+    <script>
+        const apiBaseUrl = "https://61924d4daeab5c0017105f1a.mockapi.io/credo/v1";
+    const newsForm = document.getElementById('newsForm');
+
+    // Event listener for form submission
+    newsForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(newsForm);
+        const newsData = {};
+        formData.forEach((value, key) => {
+            newsData[key] = value;
+        });
+
+        // Make POST request to add a new news item
+        fetch(`${apiBaseUrl}/news`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newsData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('New news item added:', data);
+            alert('New news item added!');
+            newsForm.reset();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+    </script>
+</body>
+</html>
